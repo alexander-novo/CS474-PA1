@@ -12,6 +12,7 @@ Image::Image(const Image& oldImage) : Image(oldImage.M, oldImage.N, oldImage.Q) 
 	for (unsigned i = 0; i < M * N; i++) { pixelValue[i] = oldImage.pixelValue[i]; }
 }
 
+// Move constructor - take old image's pixel values and make old image invalid
 Image::Image(Image&& oldImage) : Image(oldImage.M, oldImage.N, oldImage.Q, oldImage.pixelValue) {
 	oldImage.pixelValue = nullptr;
 }
@@ -78,6 +79,21 @@ Image& Image::operator=(const Image& rhs) {
 	pixelValue = new pixelT[M * N];
 
 	for (unsigned i = 0; i < M * N; i++) pixelValue[i] = rhs.pixelValue[i];
+
+	return *this;
+}
+
+Image& Image::operator=(Image&& rhs) {
+	if (pixelValue != nullptr) delete[] pixelValue;
+
+	M = rhs.M;
+	N = rhs.N;
+	Q = rhs.Q;
+
+	pixelValue     = rhs.pixelValue;
+	rhs.pixelValue = nullptr;
+
+	return *this;
 }
 
 Image::pixelT* Image::operator[](unsigned i) {
