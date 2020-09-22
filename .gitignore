@@ -1,0 +1,14 @@
+.vscode/
+obj/
+
+*.aux
+*.log
+*.out
+*.synctex.gz
+
+*.o
+
+Q1-Sampling/sample
+Q2-Quantization/quantize
+Q3-Equalization/equalize
+Q4-Specification/specify
