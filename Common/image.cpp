@@ -68,6 +68,18 @@ std::ostream& operator<<(std::ostream& out, const Image& im) {
 	if (out.fail()) throw std::runtime_error("Something failed with writing image.");
 }
 
+Image& Image::operator=(const Image& rhs) {
+	if (pixelValue != nullptr) delete[] pixelValue;
+
+	M = rhs.M;
+	N = rhs.N;
+	Q = rhs.Q;
+
+	pixelValue = new pixelT[M * N];
+
+	for (unsigned i = 0; i < M * N; i++) pixelValue[i] = rhs.pixelValue[i];
+}
+
 Image::pixelT* Image::operator[](unsigned i) {
 	return pixelValue + i * N;
 }

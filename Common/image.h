@@ -30,6 +30,7 @@ public:
 
 	pixelT *operator[](unsigned i);
 	const pixelT *operator[](unsigned i) const;
+	Image &operator=(const Image &rhs);
 
 	pixelT *const &pixels  = pixelValue;
 	const unsigned &rows   = M;
