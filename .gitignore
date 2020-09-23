@@ -7,6 +7,8 @@ Report/_minted-report
 *.log
 *.out
 *.synctex.gz
+*.lol
+*.toc
 
 *.o
 

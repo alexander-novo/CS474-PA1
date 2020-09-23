@@ -1,5 +1,5 @@
 % !TEX options=--shell-escape
-\documentclass{scrartcl}
+\documentclass[headings=optiontoheadandtoc,listof=totoc]{scrartcl}
 
 \usepackage{enumitem}
 \usepackage[margin=1in]{geometry}
@@ -11,19 +11,30 @@
 \usepackage{subcaption}
 \usepackage[newfloat]{minted}
 \usepackage{xcolor,tcolorbox}
+\usepackage{cleveref}
 
 \newenvironment{longlisting}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{listname=Code Listings}
 
 \definecolor{lightgray}{gray}{0.95}
 
 \newmintedfile[cppcode]{c++}{
 	linenos,
 	firstnumber=1,
-	tabsize=4,
+	tabsize=2,
 	bgcolor=lightgray,
 	frame=single,
 	breaklines,
 	%texcomments % Turned off due to the presence of _ characters in many comments
+}
+
+\newmintedfile[plotcode]{gnuplot}{
+	linenos,
+	firstnumber=1,
+	tabsize=2,
+	bgcolor=lightgray,
+	frame=single,
+	breaklines,
 }
 
 \DeclareGraphicsRule{.pgm}{eps}{.pgm}{`pgmtops #1}
@@ -38,6 +49,7 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 \newpage
 
@@ -52,6 +64,7 @@
 \subsection{Implementation}
 
 \subsection{Results and Discussion}
+\label{sec:equalization-results}
 
 \begin{figure}[H]
 	\centering
@@ -79,10 +92,20 @@
 
 \section{Histogram Specification}
 
-\clearpage
-\section*{Code Listings}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.49\textwidth]{../Images/boat}
+	\includegraphics[width=.49\textwidth]{../out/boat-sf-specify}
+	\caption{A comparison of \texttt{boat.pgm} with its specification to \texttt{sf.pgm} (right).}
+\end{figure}
 
-\subsection*{Common}
+\begin{figure}[H]
+	\centering\includegraphics[width=.7\linewidth]{../out/boat-sf-specified-plot}
+	\caption{A comparison of histograms of \texttt{boat.pgm}, \texttt{sf.pgm}, and the specified output above.}
+\end{figure}
+
+\clearpage
+\listoflistings
 
 \begin{longlisting}
 	\caption{Header file for the \texttt{Image} class.}
@@ -92,6 +115,31 @@
 \begin{longlisting}
 	\caption{Implementation file for the \texttt{Image} class.}
 	\cppcode{../Common/image.cpp}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption{Implementation file for the \texttt{Histogram} supporting library.}
+	\cppcode{../Common/histogram_tools.cpp}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption{Implementation file for the \texttt{equalize} program.}
+	\cppcode{../Q3-Equalization/main.cpp}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption{Implementation file for the \texttt{specify} program.}
+	\cppcode{../Q4-Specification/main.cpp}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[\texttt{gnuplot} plotting file for generating two-histogram comparison plots.]{\texttt{gnuplot} plotting file for generating two-histogram comparison plots.\\Used for generating comparison plots in \cref{sec:equalization-results}.}
+	\plotcode{../Q3-Equalization/plot-histograms.plt}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption[\texttt{gnuplot} plotting file for generating two-histogram comparison plots.]{\texttt{gnuplot} plotting file for generating two-histogram comparison plots.\\Used for generating comparison plots in \cref{sec:equalization-results}.}
+	\plotcode{../Q4-Specification/plot-histograms.plt}
 \end{longlisting}
 
 \end{document}

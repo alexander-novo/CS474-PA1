@@ -5,6 +5,7 @@
 #include <map>
 #include <mutex>
 
+#include "../Common/histogram_tools.h"
 #include "../Common/image.h"
 
 // Struct for inputting arguments from command line
@@ -18,7 +19,6 @@ struct Arguments {
 };
 
 void equalize(Arguments& arg);
-void printHistogram(unsigned* histogram, const Arguments& arg);
 bool verifyArguments(int argc, char** argv, Arguments& arg, int& err);
 void printHelp();
 
@@ -40,7 +40,9 @@ void equalize(Arguments& arg) {
 	std::mutex* locks      = new std::mutex[arg.inputImage.maxVal + 1];
 	// Initialise histogram bins to be empty
 #pragma omp parallel for
-	for (unsigned i = 0; i <= arg.inputImage.maxVal; i++) { histogram[i] = newHistogram[i] = 0; }
+	for (unsigned i = 0; i <= arg.inputImage.maxVal; i++) {
+		histogram[i] = newHistogram[i] = 0;
+	}
 
 	// Create histogram
 #pragma omp parallel for
@@ -53,18 +55,21 @@ void equalize(Arguments& arg) {
 
 	// Calculate CDF
 	cdf[0] = histogram[0];
-	for (unsigned i = 1; i <= arg.inputImage.maxVal; i++) { cdf[i] = cdf[i - 1] + histogram[i]; }
+	for (unsigned i = 1; i <= arg.inputImage.maxVal; i++) {
+		cdf[i] = cdf[i - 1] + histogram[i];
+	}
 
 	// Tranform image with the CDF
 #pragma omp parallel for
 	for (unsigned i = 0; i < arg.inputImage.rows * arg.inputImage.cols; i++) {
 		Image::pixelT& pixelVal = arg.inputImage.pixels[i];
-		pixelVal =
-		    cdf[pixelVal] * arg.inputImage.maxVal / (arg.inputImage.rows * arg.inputImage.cols);
+		pixelVal                = cdf[pixelVal] * arg.inputImage.maxVal /
+		           (arg.inputImage.rows * arg.inputImage.cols);
 	}
 
 	// Write new transformed image out
 	arg.outFile << arg.inputImage;
+	arg.outFile.close();
 
 	// Calculate histogram of new image
 #pragma omp parallel for
@@ -77,68 +82,46 @@ void equalize(Arguments& arg) {
 
 	// Print histograms
 	std::cout << "\nHistogram of input image \"" << arg.inputImagePath << "\":\n";
-	printHistogram(histogram, arg);
+	Histogram::print(histogram, arg.inputImage.maxVal + 1, arg.histogramWidth,
+	                 arg.histogramHeight);
 
 	std::cout << "\nHistogram of output image \"" << arg.outImagePath << "\":\n";
-	printHistogram(newHistogram, arg);
+	Histogram::print(newHistogram, arg.inputImage.maxVal + 1, arg.histogramWidth,
+	                 arg.histogramHeight);
 
 	// Print histogram data for plot file
 	if (arg.plot) {
 		arg.plotFile << "Image Input Equalized\n";
 		for (unsigned i = 0; i <= arg.inputImage.maxVal; i++) {
-			arg.plotFile << i << "    " << histogram[i] << "    " << newHistogram[i] << '\n';
+			arg.plotFile << i << "    " << histogram[i] << "    " << newHistogram[i]
+			             << '\n';
 		}
-	}
-}
-
-void printHistogram(unsigned* histogram, const Arguments& arg) {
-	// An adjusted histogram, which has been binned
-	unsigned* binnedHistogram = new unsigned[arg.histogramWidth];
-	// Maximum number of original bins represented by each new bin
-	// Each bin is this size, except maybe the last bin (which may be smaller)
-	unsigned binSize = 1 + arg.inputImage.maxVal / arg.histogramWidth;
-	// The maximum number of observations in all bins
-	unsigned maxBin = 0;
-
-	// Calculate new binnedHistogram and maxBin
-#pragma omp parallel for reduction(max : maxBin)
-	for (unsigned i = 0; i < arg.histogramWidth; i++) {
-		binnedHistogram[i] = 0;
-		for (unsigned j = binSize * i; j < binSize * (i + 1) && j < arg.inputImage.maxVal; j++) {
-			binnedHistogram[i] += histogram[j];
-		}
-		maxBin = std::max(binnedHistogram[i], maxBin);
+		arg.plotFile.close();
 	}
 
-	// The maximum number of observations each tick can represent
-	// May represent as few as 1, if present on the top of a histogram bar
-	unsigned tickSize = 1 + (maxBin - 1) / arg.histogramHeight;
-
-	for (unsigned i = 1; i <= arg.histogramHeight; i++) {
-		unsigned threshold = (arg.histogramHeight - i) * tickSize;
-		for (unsigned j = 0; j < arg.histogramWidth; j++) {
-			if (binnedHistogram[j] > threshold)
-				std::cout << '*';
-			else
-				std::cout << ' ';
-		}
-		std::cout << '\n';
-	}
+	delete[] histogram;
+	delete[] newHistogram;
+	delete[] cdf;
+	delete[] locks;
 }
 
 bool verifyArguments(int argc, char** argv, Arguments& arg, int& err) {
-	if (argc < 2 || (argc < 3 && strcmp(argv[1], "-h") && strcmp(argv[1], "--help"))) {
+	// If there are not the minimum number of arguments, print help and leave
+	if (argc < 2 ||
+	    (argc < 3 && strcmp(argv[1], "-h") && strcmp(argv[1], "--help"))) {
 		std::cout << "Missing operand.\n";
 		err = 1;
 		printHelp();
 		return false;
 	}
 
+	// If the user asks for the help menu, print help and leave
 	if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
 		printHelp();
 		return false;
 	}
 
+	// Find optional argument switches
 	for (unsigned i = 3; i < argc; i++) {
 		if (!strcmp(argv[i], "-width")) {
 			if (i + 1 >= argc) {
@@ -184,7 +167,8 @@ bool verifyArguments(int argc, char** argv, Arguments& arg, int& err) {
 			arg.plotFile.open(argv[i + 1]);
 
 			if (!arg.plotFile) {
-				std::cout << "Plot file \"" << argv[i + 1] << "\" could not be opened";
+				std::cout << "Plot file \"" << argv[i + 1]
+				          << "\" could not be opened";
 				err = 2;
 				return false;
 			}
@@ -193,12 +177,14 @@ bool verifyArguments(int argc, char** argv, Arguments& arg, int& err) {
 		}
 	}
 
+	// Required arguments
 	arg.inputImagePath = argv[1];
 	std::ifstream inFile(argv[1]);
 	try {
 		arg.inputImage = Image::read(inFile);
 	} catch (std::exception& e) {
-		std::cout << "Image \"" << argv[1] << "\"failed to be read: \"" << e.what() << "\"\n";
+		std::cout << "Image \"" << argv[1] << "\"failed to be read: \"" << e.what()
+		          << "\"\n";
 		err = 2;
 		return false;
 	}
@@ -207,7 +193,7 @@ bool verifyArguments(int argc, char** argv, Arguments& arg, int& err) {
 	arg.outFile.open(argv[2]);
 	if (!arg.outFile) {
 		std::cout << "Could not open \"" << argv[2] << "\"\n";
-		err = 3;
+		err = 2;
 		return false;
 	}
 
@@ -215,13 +201,15 @@ bool verifyArguments(int argc, char** argv, Arguments& arg, int& err) {
 }
 
 void printHelp() {
-	std::cout << "Usage: equal <image> <output> [options]   (1)\n"
-	          << "   or: equal -h                           (2)\n\n"
-	          << "(1) Take an image file as input, equalize its histogram,\n"
-	          << "    and write new image to output file.\n"
-	          << "(2) Print this help menu\n\n"
-	          << "Options:\n"
-	          << "  -width <width>    Number of histogram bins\n"
-	          << "  -height <height>  Height of histogram (in lines)\n"
-	          << "  -p <file>         Send histogram plotting data to a file for gnuplot\n";
+	std::cout
+	    << "Usage: equalize <image> <output> [options]   (1)\n"
+	    << "   or: equalize -h                           (2)\n\n"
+	    << "(1) Take an image file as input, equalize its histogram,\n"
+	    << "    and write new image to output file. Displays the original\n"
+	    << "    histogram and the new equalized histogram.\n"
+	    << "(2) Print this help menu\n\n"
+	    << "Options:\n"
+	    << "  -width <width>    Number of visual histogram bins\n"
+	    << "  -height <height>  Height of visual histogram (in lines)\n"
+	    << "  -p <file>         Send histogram plotting data to a file for gnuplot\n";
 }

@@ -1,3 +1,4 @@
+# A gnuplot plotting file to plot the two histograms of data from equalize with the -p switch
 if (!exists("outfile")) outfile='plot.eps'
 
 if (!exists("imageName")) {
@@ -6,7 +7,6 @@ if (!exists("imageName")) {
 	set title "Comparison of histograms of " . imageName . " and equalized image"
 }
 
-# set term png size 1280,960
 set terminal postscript eps enhanced color
 set output outfile
 set style data histogram
@@ -16,4 +16,4 @@ set boxwidth 0.9
 
 unset xtics
 
-plot infile using 2:xtic(1) ti col, '' u 3 ti col
+plot infile using 2:xtic(1) ti col linecolor rgb "#1b9e77", '' u 3 ti col linecolor rgb "#d95f02"

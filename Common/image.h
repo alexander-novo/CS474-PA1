@@ -9,7 +9,7 @@ public:
 	// As of right now, read and operator<< only work if it is one byte large
 	typedef unsigned char pixelT;
 	// Struct for reading just the header of an image
-	struct ImageHeader {
+	struct Header {
 		enum Type {
 			COLOR,
 			GRAY,
@@ -20,7 +20,7 @@ public:
 		// Read header from file
 		// Throws std::runtime_error for any errors encountered,
 		// such as not having a valid PGM/PPM header
-		static ImageHeader read(std::istream &in);
+		static Header read(std::istream &in);
 	};
 
 	Image();
@@ -55,4 +55,4 @@ private:
 	pixelT *pixelValue;
 };
 
-std::ostream &operator<<(std::ostream &out, const Image::ImageHeader &head);
+std::ostream &operator<<(std::ostream &out, const Image::Header &head);

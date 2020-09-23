@@ -110,10 +110,10 @@ const Image::pixelT* Image::operator[](unsigned i) const {
 }
 
 // Slightly modified version of readImageHeader() function provided by Dr. Bebis
-Image::ImageHeader Image::ImageHeader::read(std::istream& in) {
+Image::Header Image::Header::read(std::istream& in) {
 	unsigned char* charImage;
 	char header[100], *ptr;
-	ImageHeader re;
+	Header re;
 
 	// read header
 	in.getline(header, 100, '\n');
@@ -137,12 +137,12 @@ Image::ImageHeader Image::ImageHeader::read(std::istream& in) {
 	return re;
 }
 
-std::ostream& operator<<(std::ostream& out, const Image::ImageHeader& head) {
+std::ostream& operator<<(std::ostream& out, const Image::Header& head) {
 	switch (head.type) {
-		case Image::ImageHeader::Type::COLOR:
+		case Image::Header::Type::COLOR:
 			out << "PPM Color ";
 			break;
-		case Image::ImageHeader::Type::GRAY:
+		case Image::Header::Type::GRAY:
 			out << "PGM Grayscale ";
 	}
 	out << "Image size " << head.M << " x " << head.N << " and max value of " << head.Q << ".";
