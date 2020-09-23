@@ -1,3 +1,4 @@
+// Common/image.cpp
 #include "image.h"
 
 #include <cassert>
@@ -14,7 +15,8 @@ Image::Image(const Image& oldImage) : Image(oldImage.M, oldImage.N, oldImage.Q) 
 
 // Move constructor - take old image's pixel values and make old image invalid
 Image::Image(Image&& oldImage) : Image(oldImage.M, oldImage.N, oldImage.Q, oldImage.pixelValue) {
-	oldImage.pixelValue = nullptr;
+	oldImage.M = oldImage.N = oldImage.Q = 0;
+	oldImage.pixelValue                  = nullptr;
 }
 
 Image::Image(unsigned M, unsigned N, unsigned Q, pixelT* pixels)
@@ -24,6 +26,7 @@ Image::~Image() {
 	if (pixelValue != nullptr) { delete[] pixelValue; }
 }
 
+// Slightly modified version of readImage() function provided by Dr. Bebis
 Image Image::read(std::istream& in) {
 	int N, M, Q;
 	unsigned char* charImage;
@@ -56,6 +59,7 @@ Image Image::read(std::istream& in) {
 	return Image(M, N, Q, charImage);
 }
 
+// Slightly modified version of writeImage() function provided by Dr. Bebis
 std::ostream& operator<<(std::ostream& out, const Image& im) {
 	static_assert(sizeof(Image::pixelT) == 1,
 	              "Image writing only supported for single-byte pixel types.");
@@ -86,12 +90,13 @@ Image& Image::operator=(const Image& rhs) {
 Image& Image::operator=(Image&& rhs) {
 	if (pixelValue != nullptr) delete[] pixelValue;
 
-	M = rhs.M;
-	N = rhs.N;
-	Q = rhs.Q;
+	M          = rhs.M;
+	N          = rhs.N;
+	Q          = rhs.Q;
+	pixelValue = rhs.pixelValue;
 
-	pixelValue     = rhs.pixelValue;
-	rhs.pixelValue = nullptr;
+	rhs.M = rhs.N = rhs.Q = 0;
+	rhs.pixelValue        = nullptr;
 
 	return *this;
 }
@@ -104,6 +109,7 @@ const Image::pixelT* Image::operator[](unsigned i) const {
 	return pixelValue + i * N;
 }
 
+// Slightly modified version of readImageHeader() function provided by Dr. Bebis
 Image::ImageHeader Image::ImageHeader::read(std::istream& in) {
 	unsigned char* charImage;
 	char header[100], *ptr;

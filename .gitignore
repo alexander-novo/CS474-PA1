@@ -1,5 +1,7 @@
 .vscode/
 obj/
+out/
+Report/_minted-report
 
 *.aux
 *.log
@@ -7,6 +9,8 @@ obj/
 *.synctex.gz
 
 *.o
+
+Images/*.png
 
 Q1-Sampling/sample
 Q2-Quantization/quantize

@@ -1,15 +1,36 @@
+% !TEX options=--shell-escape
 \documentclass{scrartcl}
 
 \usepackage{enumitem}
 \usepackage[margin=1in]{geometry}
-\usepackage{fancyhdr}
+\usepackage[headsepline]{scrlayer-scrpage}
 \usepackage[USenglish]{babel}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage[newfloat]{minted}
+\usepackage{xcolor,tcolorbox}
 
-\pagestyle{fancy}
-\rhead{\large Novotny \& Page}
-\lhead{\large CS 474 Programming Assignment 1}
-\setlength{\headheight}{14pt}
+\newenvironment{longlisting}{\captionsetup{type=listing}}{}
+
+\definecolor{lightgray}{gray}{0.95}
+
+\newmintedfile[cppcode]{c++}{
+	linenos,
+	firstnumber=1,
+	tabsize=4,
+	bgcolor=lightgray,
+	frame=single,
+	breaklines,
+	%texcomments % Turned off due to the presence of _ characters in many comments
+}
+
+\DeclareGraphicsRule{.pgm}{eps}{.pgm}{`pgmtops #1}
+
+\pagestyle{scrheadings}
+\rohead{Novotny \& Page}
+\lohead{CS 474 Programming Assignment 1}
 
 \title{Programming Assignment 1}
 \subtitle{CS 474}
@@ -18,6 +39,59 @@
 \begin{document}
 \maketitle
 
+\newpage
 
+\section{Image Sampling}
+
+\section{Image Quantization}
+
+\section{Histogram Equalization}
+
+\subsection{Theory}
+
+\subsection{Implementation}
+
+\subsection{Results and Discussion}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.49\textwidth]{../Images/boat}
+	\includegraphics[width=.49\textwidth]{../out/boat-equal}
+	\caption{A comparison of \texttt{boat.pgm} with its equalization (right).}
+\end{figure}
+
+\begin{figure}[H]
+	\centering\includegraphics[width=.7\linewidth]{../out/boat-histogram-plot}
+	\caption{A comparison of histograms of \texttt{boat.pgm} and its equalised version}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.49\textwidth]{../Images/f_16}
+	\includegraphics[width=.49\textwidth]{../out/f_16-equal}
+	\caption{A comparison of \texttt{f\_16.pgm} with its equalization (right).}
+\end{figure}
+
+\begin{figure}[H]
+	\centering\includegraphics[width=.7\linewidth]{../out/f_16-histogram-plot}
+	\caption{A comparison of histograms of \texttt{f\_16.pgm} and its equalised version}
+\end{figure}
+
+\section{Histogram Specification}
+
+\clearpage
+\section*{Code Listings}
+
+\subsection*{Common}
+
+\begin{longlisting}
+	\caption{Header file for the \texttt{Image} class.}
+	\cppcode{../Common/image.h}
+\end{longlisting}
+
+\begin{longlisting}
+	\caption{Implementation file for the \texttt{Image} class.}
+	\cppcode{../Common/image.cpp}
+\end{longlisting}
 
 \end{document}

@@ -1,4 +1,4 @@
-CPPFLAGS = -std=c++17
+CPPFLAGS = -std=c++17 -fopenmp
 CC       = g++
 OBJDIR   = obj
 DEPDIR   = $(OBJDIR)/.deps
@@ -9,7 +9,7 @@ OBJDIRS  = $(addprefix $(OBJDIR)/, $(dir $(SOURCES)))
 DEPDIRS  = $(addprefix $(DEPDIR)/, $(dir $(SOURCES)))
 DEPFILES = $(SOURCES:%.cpp=$(DEPDIR)/%.d)
 
-.PHONY: all clean
+.PHONY: all clean report
 
 all: $(TARGETS)
 
@@ -25,15 +25,28 @@ Q3-Equalization/equalize: $(OBJDIR)/Q3-Equalization/main.o $(OBJDIR)/Common/imag
 Q4-Specification/specify: $(OBJDIR)/Q4-Specification/main.o $(OBJDIR)/Common/image.o
 	$(CC) $(CPPFLAGS) $^ -o $@
 
+out/%-equal.pgm out/%-histograms.dat: Q3-Equalization/equalize Images/%.pgm | out
+	Q3-Equalization/equalize Images/$*.pgm out/$*-equal.pgm -p out/$*-histograms.dat
+
+out/%-histogram-plot.eps: out/%-histograms.dat Q3-Equalization/plot-histograms.plt
+	gnuplot -e "infile='out/$*-histograms.dat'" -e "outfile='out/$*-histogram-plot.eps'" -e "imageName='$*.pgm'" Q3-Equalization/plot-histograms.plt
+
+report: out/boat-histogram-plot.eps Images/boat.png out/boat-equal.png out/f_16-histogram-plot.eps Images/f_16.png out/f_16-equal.png 
+
 clean:
-	rm -r $(OBJDIR)
-	rm $(TARGETS)
+	rm -rf $(OBJDIR)
+	rm -f $(TARGETS)
+	rm -rf out
+	rm -f Images/*.png
+
+%.png: %.pgm
+	pnmtopng $< > $@
 
 # Auto-Build .cpp files into .o
 $(OBJDIR)/%.o: %.cpp
 $(OBJDIR)/%.o: %.cpp $(DEPDIR)/%.d | $(DEPDIRS) $(OBJDIRS)
 	$(CC) $(DEPFLAGS) $(CPPFLAGS) -c $< -o $@
 
-$(DEPDIRS) $(OBJDIRS): ; @mkdir -p $@
+$(DEPDIRS) $(OBJDIRS) out: ; @mkdir -p $@
 $(DEPFILES):
 include $(wildcard $(DEPFILES))

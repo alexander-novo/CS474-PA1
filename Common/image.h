@@ -1,8 +1,7 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+// Common/image.h
+#pragma once
 
 #include <iostream>
-// a simple example - you would need to add more funtions
 
 class Image {
 public:
@@ -57,5 +56,3 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &out, const Image::ImageHeader &head);
-
-#endif
