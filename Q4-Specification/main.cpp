@@ -104,7 +104,8 @@ int specify(Arguments& arg) {
 				Image::pixelT& pixelVal = arg.inputImage.pixels[i];
 
 				unsigned inversePixel = cdf[pixelVal];
-				pixelVal              = targetCDF.rend() -
+
+				pixelVal = targetCDF.rend() -
 				           std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
 				                            inversePixel, std::greater<unsigned>());
 			}
