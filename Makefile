@@ -39,13 +39,13 @@ Q4-Specification/specify: $(OBJDIR)/Q4-Specification/main.o $(OBJDIR)/Common/ima
 
 ### Question 1 Outputs ###
 .SECONDEXPANSION:
-out/%-sampled.pgm: Q1-Sampling/sample Images/$$(word 1,$$(subst -, ,$$*)).pgm
+out/%-sampled.pgm: Q1-Sampling/sample Images/$$(word 1,$$(subst -, ,$$*)).pgm | out
 	Q1-Sampling/sample Images/$(word 1,$(subst -, ,$*)).pgm $@ $(word 2,$(subst -, ,$*))
 
 ### Question 3 Outputs ###
 # Generate equalized images and histogram plotting data from equalize
 out/%-equal.pgm out/%-histograms.dat: Q3-Equalization/equalize Images/%.pgm | out
-	Q3-Equalization/equalize Images/$*.pgm $@ -p out/$*-histograms.dat
+	Q3-Equalization/equalize Images/$*.pgm out/$*-equal.pgm -p out/$*-histograms.dat
 
 # Generate histogram plot from histogram plotting data
 out/%-histogram-plot.eps: out/%-histograms.dat Q3-Equalization/plot-histograms.plt
