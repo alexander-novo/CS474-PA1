@@ -4,10 +4,10 @@ if (!exists("outfile")) outfile='plot.eps'
 if (!exists("imageName")) {
 	set title "Comparison of histograms of input and output (equalized) images"
 } else {
-	set title "Comparison of histograms of " . imageName . " and equalized image"
+	set title "Comparison of histograms of " . imageName . " and equalized image" noenhanced
 }
 
-set terminal postscript eps enhanced color
+set terminal postscript eps enhanced color size 6,3
 set output outfile
 set style data histogram
 set style histogram cluster gap 1
