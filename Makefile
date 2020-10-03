@@ -83,7 +83,9 @@ out/%-specified-plot.eps: out/%-compare-histograms.dat Q4-Specification/plot-his
 
 # Figures needed for the report
 report: out/boat-histogram-plot.eps out/f_16-histogram-plot.eps out/boat-sf-specified-plot.eps out/f_16-peppers-specified-plot.eps
-report: Images/boat.png out/boat-equal.png Images/f_16.png out/f_16-equal.png out/boat-sf-specify.png out/f_16-peppers-specify.png 
+report: Images/boat.png out/boat-equal.png Images/f_16.png out/f_16-equal.png out/boat-sf-specify.png out/f_16-peppers-specify.png
+report: Images/lenna.png Images/peppers.png out/lenna-2-sampled.png out/lenna-4-sampled.png out/lenna-8-sampled.png out/peppers-2-sampled.png out/peppers-4-sampled.png out/peppers-8-sampled.png
+report: out/lenna-128-quantized.png out/lenna-32-quantized.png out/lenna-8-quantized.png out/lenna-2-quantized.png out/peppers-128-quantized.png out/peppers-32-quantized.png out/peppers-8-quantized.png out/peppers-2-quantized.png
 
 clean:
 	rm -rf $(OBJDIR)
