@@ -1,3 +1,4 @@
+# Q3-Equalization/plot-histograms.plt
 # A gnuplot plotting file to plot the two histograms of data from equalize with the -p switch
 if (!exists("outfile")) outfile='plot.eps'
 
@@ -16,4 +17,7 @@ set boxwidth 0.9
 
 unset xtics
 
-plot infile using 2:xtic(1) ti col linecolor rgb "#1b9e77", '' u 3 ti col linecolor rgb "#d95f02"
+# Colors chosen using ColorBrewer 2.0 qualitative scheme "Dark2"
+# https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3
+plot infile using 2:xtic(1) ti col linecolor rgb "#1b9e77",\
+	'' u 3 ti col linecolor rgb "#d95f02"
