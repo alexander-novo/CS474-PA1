@@ -56,8 +56,13 @@
 \lohead{CS 474 Programming Assignment 1}
 
 \title{Programming Assignment 1}
+<<<<<<< Updated upstream
 \subtitle{CS 474\\\url{https://github.com/alexander-novo/CS474-PA1}}
 \author{Alexander Novotny\\--\% Work \and Matthew Lyman Page\\--\% Work}
+=======
+\subtitle{CS 474}
+\author{Alexander Novotny \and Matthew Page}
+>>>>>>> Stashed changes
 
 \begin{document}
 \maketitle
@@ -67,7 +72,87 @@
 
 \section{Image Sampling}
 
+\subsection{Theory}
+Image sampling is one of two key processes during image acquisition and digitization. Intuitively, sampling can be defined as the process whereby a continuous image is transformed such that the 2D locations of an image are represented by a discrete coordinate system. Mathematically this can be defined as a map \[
+	m:f(s, t) \rightarrow f(x, y)
+\]where s, t are non-negative real values and x, y are non-negative integers. In this formalism an image is viewed as a 2D function, where the domain defines the location of the image and the range defines the possible pixel values of the image.
+
+The quality of a digital image depends heavily on the number of samples taken. An image with more samples will in general appear more alike to the original continuous image, however it will require more memory to store an image as the number of samples increases. If an image is under sampled, then certain artifacts may appear in the newly created digital image and aliasing may occur.
+
+\subsection{Implementation}
+In order to implement image sampling, a pgm image was first read into the program using command line arguments, along with the output image location and sub sampling factor. In order to sample the image, image pixels were iterated over using a nested for loop, however, every n pixels were skipped, where n is the sub-sample factor. For every n pixels, its value was stored and a second set of nested for loops were used in order to modify a k by k window of pixels, such that each pixel in the window became the same value as the sampled image. This process continues until the end of the image is reached. This approach was taken so that the image would maintain the same number of pixels for comparison and visualization purposes. The main data structure used was the image class, used to represent the original image. Each value of the image was modified in place to create the sub-sampled image.
+
+\subsection{Results and Discussion}
+The results of the sub-sampling algorithm are showcased using the \texttt{lenna.pgm} and \texttt{peppers.pgm} images. Figure 1 used the \texttt{lenna.pgm} image to demonstrate the effect of sub-sampling. According to the figure, the effects of sub-sampling become prominent immediately, particularly along the edges within the image where aliasing can be seen. Once the image is sub-sampled by a factor of four, the details of the image begin to be obscured. This is especially shown in the features of the woman’s face and hair, where the details become less clear. Lastly, the image sub-sampled by a factor of eight loses nearly all of its finer details, and only the larger, more general features of the image remain identifiable. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=.2\textwidth]{../Images/lenna}
+	\includegraphics[width=.2\textwidth]{../out/lenna-2-sampled}
+	\includegraphics[width=.2\textwidth]{../out/lenna-4-sampled}
+	\includegraphics[width=.2\textwidth]{../out/lenna-8-sampled}
+	\caption{A comparison of \texttt{lenna.pgm} with varying sub-sampled images, scaled accordingly (From left to right: 256 x 256, 128 x 128, 64 x 64, 32 x 32).}
+	\label{fig:equal-result-2}
+\end{figure}
+
+The same sub-sampling process was conducted with the peppers image, which are shown in Fig. 2. Similarly to the \texttt{lenna.pgm} image, the image quality begins to degrade after sub-sampling by a factor of two. After sub-sampling by a factor of four, the aliasing on the pepper’s edges becomes more evident and the original texture of the peppers becomes more distorted. Finally, the image sub-sampled by a factor of eight loses most of the small details and it becomes difficult to make out the original image.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=.2\textwidth]{../Images/peppers}
+	\includegraphics[width=.2\textwidth]{../out/peppers-2-sampled}
+	\includegraphics[width=.2\textwidth]{../out/peppers-4-sampled}
+	\includegraphics[width=.2\textwidth]{../out/peppers-8-sampled}
+	\caption{A comparison of \texttt{peppers.pgm} with varying subsampled images, scaled accordingly (From left to right: 256 x 256, 128 x 128, 64 x 64, 32 x 32).}
+	\label{fig:equal-result-2}
+\end{figure}
+
+Based on the sampling experiments conducted, it appears that sampling has an immediate effect on the pgm images, with the smoothness of the edges being lost initially, followed by smaller details within the image, and finally the image loses most of its original features. Although details may be lost, sub-sampling may provide an opportunity to reduce the memory requirements of an image at a cost of quality. Further comparisons between sub-sampling and the technique of image quantization will be discussed at the end of the following section.
+
 \section{Image Quantization}
+
+\subsection{Theory}
+Image quantization is the second major process when digitizing an image. As opposed to image sampling, which aims to discretize the image coordinates or pixel locations, quantization is responsible for discretizing the pixel values from a continuous value to finite integer values. Using the same model of an image as a 2D function, quantization is equivalent to transforming the output, or range, of the image function \mathcal{f(x,y)} from the set of non-negative real values to a finite set of non-negative integer values. Similar to sampling, quantization is required in order to properly store an image on a digital system by limiting the required number of parameters needed to represent an image, thereby saving memory or disk space.
+
+The number of integers used for the pixel values is defined by the quantization level \mathcal{L}. Typically this value is power of 2, and determines the range of possible pixel values from 0 up to \mathcal{L-1}. In general, the higher the quantization level is, the higher the quality of the image will be, due to more gray level values being possible at each pixel location. 
+
+\subsection{Implementation}
+
+Image quantization also used command line arguments to read the input image, output image location, and quantization level. After reading the image, each pixel is iterated over and discretized according to the new quantization level. 
+
+The main data structures used in this algorithm include the image class and a vector of new pixel values between 0 and 255. These values were calculated by obtaining a pixel value offset using the equation \[\text{offset} = \frac{256}{L}\]. Therefore, a quantization level of 2 gives an offset of 128. Using this offset, the $i$th pixel value is calculated as $i \cdot offset$ for $0 \geq i \geq \text{quantization level}$. Each pixel value was converted using \[
+p_{new}=newPixelValues[ floor(p_{old} / offset) ]
+\] where \mathcal{newPixelValues} is a vector of size \mathcal{L} containing the new gray level values of the image.
+
+\subsection{Results and Discussion}
+
+The quantization algorithm was performed on the two images \texttt{peppers.pgm} and \texttt{lenna.pgm}, both of whose original quantization level were 256. The results of quantizing \texttt{lenna.pgm} are shown in Fig. 3. According to the figure, there is little noticeable difference from quantizing the image down to 128 and 32 gray level values. However, as seen in the figure, once the quantization level dropped to 8, noticeable differences begin to appear in the shading of the image. At quantization level two, the image essentially becomes a binary image, with much of the shading detail lost.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=.15\textwidth]{../Images/lenna}
+	\includegraphics[width=.15\textwidth]{../out/lenna-128-quantized}
+	\includegraphics[width=.15\textwidth]{../out/lenna-32-quantized}
+	\includegraphics[width=.15\textwidth]{../out/lenna-8-quantized}
+	\includegraphics[width=.15\textwidth]{../out/lenna-2-quantized}
+	\caption{A comparison of \texttt{lenna.pgm} with varying quantization levels (From left to right: L=256, L=128, L=32, L=8, and L=2).}
+	\label{fig:equal-result-2}
+\end{figure}
+
+Figure 4 demonstrates a similar quantization process for the \texttt{pepper.pgm} image. With this image, there are very little noticeable differences for the level 128 and 32 quantized images compared to the original. At quantization level 8, the differences become prominent, especially for the two large peppers featured at the center of the image. Lastly, the level two quantized pepper image on the right resembles a binary image, with minimal detail compared to the other images.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=.15\textwidth]{../Images/peppers}
+	\includegraphics[width=.15\textwidth]{../out/peppers-128-quantized}
+	\includegraphics[width=.15\textwidth]{../out/peppers-32-quantized}
+	\includegraphics[width=.15\textwidth]{../out/peppers-8-quantized}
+	\includegraphics[width=.15\textwidth]{../out/peppers-2-quantized}
+	\caption{A comparison of \texttt{peppers.pgm} with varying quantization levels (From left to right: L=256, L=128, L=32, L=8, and L=2).}
+	\label{fig:equal-result-2}
+\end{figure}
+
+Overall, it appears that the effects of image quantization does not degrade an image as much as image sub-sampled. With both images, the effects of image sub-sampled become noticeable even after sub-sapling by a factor of two, whereas in image quantization the effects do not drastically detract from the quality of the image until the quantization level of 8 is used. As a consequence, in the case of memory limitations it would be advisable to first reduce the quantization level of an image rather than sub-sample it, as this would lead to the fewest defects while reducing the memory requirements of an image.
 
 \section{Histogram Equalization}
 

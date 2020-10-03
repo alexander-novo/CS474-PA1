@@ -12,14 +12,6 @@
 */
 void subsample_image(Image& image, int subsample_factor){
 
-	//Todo: add option to not resize image
-	//int M = image.rows / subsample_factor;
-	//int N = image.cols / subsample_factor;
-	//int Q = image.maxVal;
-	//pixelT* pixels;
-
-	//Image newImage = Image(M, N, Q, image.pixels);
-
 	// iterate through image to get the sample
 	for(int i=0; i<image.cols; i += subsample_factor){
    		for(int j=0; j<image.rows; j += subsample_factor) {
@@ -47,6 +39,7 @@ int main(int argc, char** argv) {
  	int subsample_factor;
  	std::istringstream ss(argv[3]);
 
+ 	// Get sampling factor, error checking
  	if(ss >> subsample_factor) {
  		if(256 % subsample_factor != 0 || subsample_factor > 256){
  			std::cout << "Error: Subsample factor should be power of 2 less than 256" << std::endl;
@@ -55,12 +48,14 @@ int main(int argc, char** argv) {
  		}
  	}
 
+ 	//read image
  	std::ifstream inFile(argv[1]);
 
  	Image image = Image::read(inFile);
 
 	std::cout << "Question 1: Sampling." << std::endl;
 
+	// sample the image
 	subsample_image(image, subsample_factor);
 
 	// Save output image

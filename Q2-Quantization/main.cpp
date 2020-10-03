@@ -14,6 +14,8 @@
 void quantize_image(Image& image, int quantization_level){
 
   int offset = 256 / quantization_level;
+
+  // New set of possible pixel values
   std::vector<int> newPixelValues;
 
   // calculate new values for pixels
@@ -21,6 +23,7 @@ void quantize_image(Image& image, int quantization_level){
       newPixelValues.push_back(i * offset);
 
 
+  // For each pixel
 	for(int i=0; i<image.cols; i++) {
    		for(int j=0; j<image.rows; j++) {
 
@@ -43,6 +46,7 @@ int main(int argc, char** argv) {
  	int quantization_level;
  	std::istringstream ss(argv[3]);
 
+  // GEt quantization level
  	if(ss >> quantization_level) {
  		if(quantization_level > 256){
  			std::cout << "Error: Quantization level should be less than 256" << std::endl;
@@ -51,12 +55,14 @@ int main(int argc, char** argv) {
  		}
  	}
 
+  // Read original image
  	std::ifstream inFile(argv[1]);
 
  	Image image = Image::read(inFile);
 
 	std::cout << "Question 2: Quantization." << std::endl;
 
+  // Quantize the image
 	quantize_image(image, quantization_level);
 
 	// Save output image
