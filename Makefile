@@ -10,7 +10,7 @@ SOURCES      = Common/image.cpp Common/histogram_tools.cpp Q1-Sampling/main.cpp 
 EXEC         = Q1-Sampling/sample Q2-Quantization/quantize Q3-Equalization/equalize Q4-Specification/specify
 # Targets required for the homework, spearated by question
 REQUIRED_1   = out/lenna-2-sampled.pgm out/lenna-4-sampled.pgm out/lenna-8-sampled.pgm out/peppers-2-sampled.pgm out/peppers-4-sampled.pgm out/peppers-8-sampled.pgm
-REQUIRED_2   =
+REQUIRED_2   = out/lenna-128-quantized.pgm out/lenna-32-quantized.pgm out/lenna-8-quantized.pgm out/lenna-2-quantized.pgm out/peppers-128-quantized.pgm out/peppers-32-quantized.pgm out/peppers-8-quantized.pgm out/peppers-2-quantized.pgm
 REQUIRED_3   = out/boat-equal.pgm out/f_16-equal.pgm
 REQUIRED_4   = out/boat-sf-specify.pgm out/f_16-peppers-specify.pgm
 REQUIRED_OUT = $(REQUIRED_1) $(REQUIRED_2) $(REQUIRED_3) $(REQUIRED_4)
@@ -41,6 +41,11 @@ Q4-Specification/specify: $(OBJDIR)/Q4-Specification/main.o $(OBJDIR)/Common/ima
 .SECONDEXPANSION:
 out/%-sampled.pgm: Q1-Sampling/sample Images/$$(word 1,$$(subst -, ,$$*)).pgm | out
 	Q1-Sampling/sample Images/$(word 1,$(subst -, ,$*)).pgm $@ $(word 2,$(subst -, ,$*))
+
+### Question 2 Outputs ###
+.SECONDEXPANSION:
+out/%-quantized.pgm: Q2-Quantization/quantize Images/$$(word 1,$$(subst -, ,$$*)).pgm | out
+	Q2-Quantization/quantize Images/$(word 1,$(subst -, ,$*)).pgm $@ $(word 2,$(subst -, ,$*))
 
 ### Question 3 Outputs ###
 # Generate equalized images and histogram plotting data from equalize
