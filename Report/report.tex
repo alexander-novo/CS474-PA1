@@ -57,7 +57,7 @@
 
 \title{Programming Assignment 1}
 \subtitle{CS 474\\\url{https://github.com/alexander-novo/CS474-PA1}}
-\author{Alexander Novotny\\50\% Work \and Matthew Lyman Page\\50\% Work}
+\author{Alexander Novotny\\50\% Work\\Sections \ref*{sec:equalization},\ref*{sec:specification} \and Matthew Page\\50\% Work\\Sections \ref*{sec:sampling},\ref*{sec:quantization}}
 \date{Due: October 5, 2020 \\ Submitted: \today}
 
 \begin{document}
@@ -69,6 +69,7 @@
 \pagenumbering{arabic}
 
 \section{Image Sampling}
+\label{sec:sampling}
 
 \subsection{Theory}
 Image sampling is one of two key processes during image acquisition and digitization. Intuitively, sampling can be defined as the process whereby a continuous image is transformed such that the 2D locations of an image are represented by a discrete coordinate system. Mathematically this can be defined as a map \[
@@ -108,6 +109,7 @@ The same sub-sampling process was conducted with the peppers image, which are sh
 Based on the sampling experiments conducted, it appears that sampling has an immediate effect on the pgm images, with the smoothness of the edges being lost initially, followed by smaller details within the image, and finally the image loses most of its original features. Although details may be lost, sub-sampling may provide an opportunity to reduce the memory requirements of an image at a cost of quality. Further comparisons between sub-sampling and the technique of image quantization will be discussed at the end of the following section.
 
 \section{Image Quantization}
+\label{sec:quantization}
 
 \subsection{Theory}
 Image quantization is the second major process when digitizing an image. As opposed to image sampling, which aims to discretize the image coordinates or pixel locations, quantization is responsible for discretizing the pixel values from a continuous value to finite integer values. Using the same model of an image as a 2D function, quantization is equivalent to transforming the output, or range, of the image function $f(x,y)$ from the set of non-negative real values to a finite set of non-negative integer values. Similar to sampling, quantization is required in order to properly store an image on a digital system by limiting the required number of parameters needed to represent an image, thereby saving memory or disk space.
@@ -153,6 +155,7 @@ The quantization algorithm was performed on the two images \texttt{peppers.pgm} 
 Overall, it appears that the effects of image quantization does not degrade an image as much as sub-sampling. With both images, the effects of image sub-sampling become noticeable even after sub-sampling by a factor of two, whereas in image quantization the effects do not drastically detract from the quality of the image until the quantization level of 8 is used. As a consequence, in the case of memory limitations it would be advisable to first reduce the quantization level of an image rather than sub-sample it, as this would lead to the fewest defects while reducing the memory requirements of an image.
 
 \section{Histogram Equalization}
+\label{sec:equalization}
 
 \subsection{Theory}
 \label{sec:equalization-theory}
@@ -231,6 +234,7 @@ The source code for this implementation can be found in \cref{lst:equalize}.
 The source code for generating these histogram comparison figures can be found in \cref{lst:histogram-plot-double}.
 
 \section{Histogram Specification}
+\label{sec:specification}
 
 \subsection{Theory}
 As demonstrated in \cref{sec:equalization-results}, we can transform images to have a similar distribution of pixel intensities as a uniform distribution by using the CDF of the image. Since CDFs are monotonically increasing, the pre-image of a single point is always a continuous interval, and when the CDF is strictly increasing (as is usually the case), the pre-image of a single point is also a single point. In this way, we can naturally define an ``inverse'' CDF
