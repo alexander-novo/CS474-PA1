@@ -58,6 +58,7 @@
 \title{Programming Assignment 1}
 \subtitle{CS 474\\\url{https://github.com/alexander-novo/CS474-PA1}}
 \author{Alexander Novotny\\50\% Work \and Matthew Lyman Page\\50\% Work}
+\date{Due: October 5, 2020 \\ Submitted: \today}
 
 \begin{document}
 \maketitle
@@ -74,7 +75,7 @@ Image sampling is one of two key processes during image acquisition and digitiza
 	m:f(s, t) \rightarrow f(x, y)
 \]where $s, t$ are non-negative real values and $x, y$ are non-negative integers. In this formalism an image is viewed as a 2D function, where the domain defines the location of the image and the range defines the possible pixel values of the image.
 
-The quality of a digital image depends heavily on the number of samples taken. An image with more samples will in general appear more alike to the original continuous image, however it will require more memory to store an image as the number of samples increases. If an image is under sampled, then certain artifacts may appear in the newly created digital image and aliasing may occur.
+The quality of a digital image depends heavily on the number of samples taken. An image with more samples will in general appear more alike to the original continuous image, however it will require more memory to store an image as the number of samples increases. If an image is under sampled, then certain artifacts may appear in the newly created digital image and aliasing may occur. The spatial resolution of an image is a measure of how well sampled an image is, and helps quantify image quality in terms of pixels per unit of distance.
 
 \subsection{Implementation}
 In order to implement image sampling, a pgm image was first read into the program using command line arguments, along with the output image location and sub sampling factor. In order to sample the image, image pixels were iterated over using a nested for loop, however, every $n$ pixels were skipped, where $n$ is the sub-sample factor. For every $n$ pixels, its value was stored and a second set of nested for loops were used in order to modify a $k \times k$ window of pixels, such that each pixel in the window became the same value as the sampled image. This process continues until the end of the image is reached. This approach was taken so that the image would maintain the same number of pixels for comparison and visualization purposes. The main data structure used was the image class, used to represent the original image. Each value of the image was modified in place to create the sub-sampled image.
@@ -111,7 +112,7 @@ Based on the sampling experiments conducted, it appears that sampling has an imm
 \subsection{Theory}
 Image quantization is the second major process when digitizing an image. As opposed to image sampling, which aims to discretize the image coordinates or pixel locations, quantization is responsible for discretizing the pixel values from a continuous value to finite integer values. Using the same model of an image as a 2D function, quantization is equivalent to transforming the output, or range, of the image function $f(x,y)$ from the set of non-negative real values to a finite set of non-negative integer values. Similar to sampling, quantization is required in order to properly store an image on a digital system by limiting the required number of parameters needed to represent an image, thereby saving memory or disk space.
 
-The number of integers used for the pixel values is defined by the quantization level $L$. Typically this value is power of 2, and determines the range of possible pixel values from 0 up to $L-1$. In general, the higher the quantization level is, the higher the quality of the image will be, due to more gray level values being possible at each pixel location. 
+The number of integers used for the pixel values is defined by the quantization level $L$. Typically this value is power of 2, and determines the range of possible pixel values from 0 up to $L-1$. In general, the higher the quantization level is, the higher the quality of the image will be, due to more gray level values being possible at each pixel location. The measure of the number of possible discernible pixel or gray level values is defined as the intensity resolution of an image.
 
 \subsection{Implementation}
 
@@ -149,7 +150,7 @@ The quantization algorithm was performed on the two images \texttt{peppers.pgm} 
 	\label{fig:quantize-result-2}
 \end{figure}
 
-Overall, it appears that the effects of image quantization does not degrade an image as much as image sub-sampled. With both images, the effects of image sub-sampled become noticeable even after sub-sapling by a factor of two, whereas in image quantization the effects do not drastically detract from the quality of the image until the quantization level of 8 is used. As a consequence, in the case of memory limitations it would be advisable to first reduce the quantization level of an image rather than sub-sample it, as this would lead to the fewest defects while reducing the memory requirements of an image.
+Overall, it appears that the effects of image quantization does not degrade an image as much as sub-sampling. With both images, the effects of image sub-sampling become noticeable even after sub-sampling by a factor of two, whereas in image quantization the effects do not drastically detract from the quality of the image until the quantization level of 8 is used. As a consequence, in the case of memory limitations it would be advisable to first reduce the quantization level of an image rather than sub-sample it, as this would lead to the fewest defects while reducing the memory requirements of an image.
 
 \section{Histogram Equalization}
 
