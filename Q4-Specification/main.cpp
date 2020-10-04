@@ -106,9 +106,14 @@ int specify(Arguments& arg) {
 
 				unsigned inversePixel = cdf[pixelVal];
 
-				pixelVal = targetCDF.rend() -
-				           std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
-				                            inversePixel, std::greater<unsigned>());
+				// Since there are 257 possible values (256 different "found" objects
+				// + none found), clamp to 256 possible values
+				pixelVal = std::max<unsigned>(
+				               1, targetCDF.rend() -
+				                      std::lower_bound(targetCDF.rbegin(),
+				                                       targetCDF.rend(), inversePixel,
+				                                       std::greater<unsigned>())) -
+				           1;
 			}
 		} else {
 #pragma omp parallel for
@@ -117,9 +122,15 @@ int specify(Arguments& arg) {
 
 				unsigned inversePixel = cdf[pixelVal] * targetPixels /
 				                        (arg.inputImage.rows * arg.inputImage.cols);
-				pixelVal = targetCDF.rend() -
-				           std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
-				                            inversePixel, std::greater<unsigned>());
+
+				// Since there are 257 possible values (256 different "found" objects
+				// + none found), clamp to 256 possible values
+				pixelVal = std::max<unsigned>(
+				               1, targetCDF.rend() -
+				                      std::lower_bound(targetCDF.rbegin(),
+				                                       targetCDF.rend(), inversePixel,
+				                                       std::greater<unsigned>())) -
+				           1;
 			}
 		}
 	} else if (arg.inputImage.rows * arg.inputImage.cols == targetPixels) {
@@ -129,9 +140,15 @@ int specify(Arguments& arg) {
 
 			unsigned inversePixel =
 			    cdf[pixelVal] * arg.inputImage.maxVal / (targetHistogram.size() - 1);
-			pixelVal = targetCDF.rend() -
-			           std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
-			                            inversePixel, std::greater<unsigned>());
+
+			// Since there are 257 possible values (256 different "found" objects
+			// + none found), clamp to 256 possible values
+			pixelVal =
+			    std::max<unsigned>(
+			        1, targetCDF.rend() -
+			               std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
+			                                inversePixel, std::greater<unsigned>())) -
+			    1;
 		}
 	} else {
 		// In this case, we need to do math with ull because of the multiplications
@@ -144,9 +161,14 @@ int specify(Arguments& arg) {
 			                        arg.inputImage.maxVal * targetPixels /
 			                        (arg.inputImage.rows * arg.inputImage.cols *
 			                         (targetHistogram.size() - 1));
-			pixelVal = targetCDF.rend() -
-			           std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
-			                            inversePixel, std::greater<unsigned>());
+			// Since there are 257 possible values (256 different "found" objects
+			// + none found), clamp to 256 possible values
+			pixelVal =
+			    std::max<unsigned>(
+			        1, targetCDF.rend() -
+			               std::lower_bound(targetCDF.rbegin(), targetCDF.rend(),
+			                                inversePixel, std::greater<unsigned>())) -
+			    1;
 		}
 	}
 #pragma endregion CDF transformation
