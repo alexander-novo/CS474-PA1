@@ -9,6 +9,8 @@ Report/_minted-report
 *.synctex.gz
 *.lol
 *.toc
+*.fff
+*.lof
 
 *.o
 

@@ -1,19 +1,29 @@
 % !TEX options=--shell-escape
-\documentclass[headings=optiontoheadandtoc,listof=totoc]{scrartcl}
+\documentclass[headings=optiontoheadandtoc,listof=totoc,parskip=full]{scrartcl}
 
 \usepackage{amsmath,mathtools}
 \usepackage{enumitem}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=.75in]{geometry}
 \usepackage[headsepline]{scrlayer-scrpage}
 \usepackage[USenglish]{babel}
 \usepackage{hyperref}
+\usepackage{xurl}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{subcaption}
 \usepackage[newfloat]{minted}
 \usepackage{xcolor,tcolorbox}
-\usepackage{cleveref}
 \usepackage{physics}
+\usepackage{needspace}
+\usepackage{tikz-cd}
+\usepackage[format=hang, justification=justified]{caption}
+
+\usepackage{cleveref} % Needs to be loaded last
+
+\hypersetup{
+	linktoc = all,
+	pdfborder = {0 0 .5 [ 1 3 ]}
+}
 
 \newenvironment{longlisting}{\captionsetup{type=listing}}{}
 \SetupFloatingEnvironment{listing}{listname=Code Listings}
@@ -46,8 +56,8 @@
 \lohead{CS 474 Programming Assignment 1}
 
 \title{Programming Assignment 1}
-\subtitle{CS 474}
-\author{Alexander Novotny \and Matthew Lyman Page}
+\subtitle{CS 474\\\url{https://github.com/alexander-novo/CS474-PA1}}
+\author{Alexander Novotny\\--\% Work \and Matthew Lyman Page\\--\% Work}
 
 \begin{document}
 \maketitle
@@ -63,25 +73,32 @@
 
 \subsection{Theory}
 \label{sec:equalization-theory}
-It is desirable to have high contrast in an image, as it allows you (and a computer vision algorithm) to pick out details more easily. In general, images whose histograms have a uniform distribution tend to have high contrast - especially when compared with images with a central mode (represented by a central "hump" in the histogram). To convert a (continuously distributed) random variable $X$ to a uniform distributed random variable $Y$, we simply apply the transformation \[Y = F_X(X),\] where $F_X$ is the CDF (cumulative distribution function) of $X$. As a transformation of the variable $X$, we know then that the PDF (probability density function) of $Y$ is
+It is desirable to have high contrast in an image, as it allows you (and a computer vision algorithm) to pick out details more easily. In general, images whose histograms have a uniform distribution tend to have high contrast - especially when compared with images with a central mode (represented by a central ``hump'' in the histogram). To convert a (continuously distributed) random variable $X$ to a uniform distributed random variable $Y$, we simply apply the transformation \[
+	Y = F_X(X),
+\] where $F_X$ is the CDF (cumulative distribution function) of $X$. As a transformation of the variable $X$, we know then that the PDF (probability density function) of $Y$ is
 \begin{align*}
 	f_Y(y) &= f_X(F_X^{-1}(y)) \abs{\dv{y} F_X^{-1}(y)},\\
-\shortintertext{and by the inverse function theorem of calculus,}
+\intertext{and by the inverse function theorem of calculus,}
 		&= f_X(F_X^{-1}(y)) \abs{\frac{1}{F_X'(F_X^{-1}(y))}}\\
 		&= f_X(F_X^{-1}(y)) \abs{\frac{1}{f_X(F_X^{-1}(y))}}\\
 		&= 1,
 \end{align*}
-so $Y \sim U(0, 1)$. Of course, this only applies to continuous random variables, but we hope that a similar behaviour can be observed in discrete random variables. Unfortunately, since all pixels fall into a certain number of 'bins' in the image's histogram (based on the quantization of the image), the transform can't decrease the number of pixels in a bin. Instead, it can only spread bins out in the histogram and consolidate multiple bins into one, increasing the number of pixels in a bin. Therefore, if there are noticeable modes in the original image's histogram, there will still be noticeable modes in the equalized histogram. As well, image quality will drop due to the spreading out and consolidating of bins effectively quantizing the image.
+so $Y \sim \mathcal U(0, 1)$. Of course, this only applies to continuous random variables, but we hope that a similar behaviour can be observed in discrete random variables. Unfortunately, since all pixels fall into a certain number of ``bins'' in the image's histogram (based on the quantization level of the image), the transform can't decrease the number of pixels in a bin. Instead, it can only spread bins out in the histogram and consolidate multiple bins into one, increasing the number of pixels in a bin. Therefore, if there are noticeable modes in the original image's histogram, there will still be noticeable modes in the equalized histogram. As well, image quality will drop due to the spreading out and consolidating of bins effectively quantizing the image. \par
+
+Since this behaviour comes from the approximation of continuous distributions by discrete distributions, the better an approximation is, the less noticeable these effects become. Therefore, increasing the quantization level of an image will make the process more effective, causing the output image's histogram to be more like a uniform distribution.
 
 \subsection{Implementation}
-An array of integers is used for the image's histogram, which is calculated by looping over the image's pixels and incrementing the bin whose index is given by the pixel's value. Then, the CDF is calculated by iteratively summing over the calculated histogram, using the recurrence relation for discrete CDFs:
+\label{sec:equalization-implementation}
+
+An array of integers is used for the image's histogram, which is calculated by looping over the image's pixels and incrementing the bin whose index is given by the pixel's intensity value. Then, the CDF is calculated by iteratively summing over the calculated histogram, using the recurrence relation for discrete CDFs:
 \begin{equation}
 	\begin{aligned}
 		F_X(x) &= \sum_{i = -\infty}^x P(X = x)\\
 			&= P(X = x) + \sum_{i = -\infty}^{x - 1} P(X = x)\\
-			&= P(X = x) + F_X(x - 1).
+			&= P(X = x) + F_X(x - 1),
 	\end{aligned}
 \end{equation}
+where $P(X = x)$ is the histogram value of the intensity $x$. Since pixel intensities have finitely many values (and therefore a minimum value), $F_X(x - 1) = 0$ for some $x$ (the minimum intensity) and $F_X(x) = P(X = x)$.
 
 The CDF is never converted to its normalized version. Instead, when applying the transformation, each resulting transformed pixel is multiplied by the normalization constant. This is to prevent accumulation of round-off errors until the final integer pixel value is calculated. \par
 
@@ -94,7 +111,7 @@ The source code for this implementation can be found in \cref{lst:equalize}.
 
 \Cref{fig:equal-result-1} shows the result of applying the algorithm to the image \texttt{boat.pgm}. There is a noticeable difference in contrast - especially in the water, which is much clearer, and the shadows on the sail. However, there is some noise introduced in the sky, and loss of detail on the coast.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=.35\textwidth]{../Images/boat}
 	\includegraphics[width=.35\textwidth]{../out/boat-equal}
@@ -104,15 +121,15 @@ The source code for this implementation can be found in \cref{lst:equalize}.
 
 \Cref{fig:equal-histogram-1} compares the original histogram of \texttt{boat.pgm} with the histogram of the new equalized image. As discussed in \cref{sec:equalization-theory}, the new histogram is not that of a uniform distribution, but there are some notable improvements over the original histogram. Firstly, the bins concentrated around the various modes have become sparser, so while the modes still exist with the same number of pixels in their bins(as discussed earlier), there are fewer pixels in the region of the bin. As well, a couple of the modes have spread out, making them easier to differentiate between. Finally, the bins in lower regions of the histogram have concentrated so they aren't as low compared to the modes.
 
-\begin{figure}[ht]
-	\centering\includegraphics[width=.75\linewidth]{../out/boat-histogram-plot}
+\begin{figure}[H]
+	\centering\includegraphics[width=.8\linewidth]{../out/boat-histogram-plot}
 	\caption{A comparison of histograms of \texttt{boat.pgm} and its equalized version}
 	\label{fig:equal-histogram-1}
 \end{figure}
 
 \Cref{fig:equal-result-2} shows the result of applying the algorithm to the image \texttt{f\_16.pgm}. There's a drastic increase in contrast in the clouds, but the results around the text on the plane are a mixed bag - the ``U.S. AIR FORCE'' text in the middle of the plane has good increase in contrast, while the ``F-16'' text on the tail has a decrease in contrast. As well, there is loss of detail on the mountains and the aberration along the left and lower rims of the image.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=.35\textwidth]{../Images/f_16}
 	\includegraphics[width=.35\textwidth]{../out/f_16-equal}
@@ -122,47 +139,86 @@ The source code for this implementation can be found in \cref{lst:equalize}.
 
 \Cref{fig:equal-histogram-2} compares the original histogram of \texttt{f\_16.pgm} with the histogram of the new equalized image. The sparseness of bins and consolidation of bins is more apparent than in the previous example, especially around the mode of the image. This probably accounts for the loss of detail in the image, since most of the notable loss of detail happened in brighter regions of the image. These regions all got placed into the same bin, causing them to lose contrast and detail.
 
-\begin{figure}[ht]
-	\centering\includegraphics[width=.75\linewidth]{../out/f_16-histogram-plot}
+\begin{figure}[H]
+	\centering\includegraphics[width=.8\linewidth]{../out/f_16-histogram-plot}
 	\caption{A comparison of histograms of \texttt{f\_16.pgm} and its equalized version}
 	\label{fig:equal-histogram-2}
 \end{figure}
 
+The source code for generating these histogram comparison figures can be found in \cref{lst:histogram-plot-double}.
+
 \section{Histogram Specification}
 
 \subsection{Theory}
+As demonstrated in \cref{sec:equalization-results}, we can transform images to have a similar distribution of pixel intensities as a uniform distribution by using the CDF of the image. Since CDFs are monotonically increasing, the pre-image of a single point is always a continuous interval, and when the CDF is strictly increasing (as is usually the case), the pre-image of a single point is also a single point. In this way, we can naturally define an ``inverse'' CDF
+\begin{equation}
+	Q_X(x) = \inf F_X^{-1}({x}), \label{eq:quantile-func}
+\end{equation}
+known as the ``quantile'' function. Note that for discrete distributions, the infimum is equal to the minimum, and is chosen because because CDFs are right-continuous (so in a discrete distribution, the minimum is always a possible value). Using the quantile function, we can transform a uniform distribution back to the original distribution. In this way, for two distributions $X$ and $Y$, $F_X$ transforms $X$ to a uniform distribution and $Q_Y$ transforms a uniform distribution back to $Y$, so $Q_Y \circ F_X$ transforms $X$ to $Y$, demonstrated in  \cref{fig:specification-cd}.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzcd}
+		X \ar[rd, "F_X" description] \ar[rr, bend left, shift left, "Q_Y \circ F_X"] & & Y \ar[ld, bend right, shift right, "F_Y" description]\\
+		& \mathcal U \ar[ru, bend right, shift right, "Q_Y" description]
+	\end{tikzcd}
+	\caption{A commutative diagram showing how to map from one distribution to another using their CDFs.}
+	\label{fig:specification-cd}
+\end{figure}
+
+In this way, we can perform an image transformation similar to histogram equalization, but with a supplied distribution instead of just a uniform distribution. This can be used for a similar effect as histogram equalization, but with a handpicked distribution to help avoid detail loss like in histogram equalization.\par
+
+Similarly to histogram equalization, the math isn't exact for discrete distributions, but we can think of discrete distributions as approximations of continuous distributions. There are similar problems with this approximation as with the one made for equalization, but these problems can be lessened with increased quantization levels.
 
 \subsection{Implementation}
+
+The CDFs of the input image and input histogram are calculated in the same way as detailed in \cref{sec:equalization-implementation}. Then, each pixel's intensity is normalized with the input image's normalization constant and unnormalized with the input histogram's normalization constant. This step can be avoided if the images share a normalization constant - notably, when they are the same size and quantization levels. The quantile function (\cref{eq:quantile-func}) is then calculated on the unnormalized value using a binary search on the input histogram's CDF. This is done, rather than calculating the quantile function for every possible value, to save memory and because a binary search can take advantage of the sorted nature of the calculated CDF. \par
+
+The source code for this implementation can be found in \cref{lst:specify}.
 
 \subsection{Results and Discussion}
 \label{sec:specification-results}
 
-\begin{figure}[ht]
+\Cref{fig:specify-result-1} shows the results of specifying \texttt{boat.pgm} to \texttt{sf.pgm}'s histogram. Since \texttt{sf.pgm} has much less contrast than \texttt{boat.pgm} and fewer extremely dark/light pixels, there is a huge loss of detail.
+
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=.35\textwidth]{../Images/boat}
 	\includegraphics[width=.35\textwidth]{../out/boat-sf-specify}
 	\caption{A comparison of \texttt{boat.pgm} with its specification to \texttt{sf.pgm} (right).}
+	\label{fig:specify-result-1}
 \end{figure}
 
-\begin{figure}[ht]
-	\centering\includegraphics[width=.75\linewidth]{../out/boat-sf-specified-plot}
-	\caption{A comparison of histograms of \texttt{boat.pgm}, \texttt{sf.pgm}, and the specified output above.}
+\Cref{fig:specify-histogram-1} compares the histograms of \texttt{boat.pgm}, \texttt{sf.pgm}, and the specified output above. As can be seen, the algorithm does a much better job at matching the given histogram than matching a uniform distribution. From just a cursory glance at the comparison, it is hard to tell the output image's histogram apart from the input histogram. This is because the input histogram occupies a narrower band of intensities and has higher peaks than the input image's histogram, allowing the algorithm to consolidate bins effectively. This can be demonstrated by the areas where the algorithm fails to transform the histogram well - near the right side of the histogram - since this region of the input image's histogram is much larger than the input histogram. The reverse transformation would likely not be nearly as successful.
+
+\begin{figure}[H]
+	\centering\includegraphics[width=.8\linewidth]{../out/boat-sf-specified-plot}
+	\caption{A comparison of histograms of \texttt{boat.pgm}, \texttt{sf.pgm}, and the specified output as seen in \cref{fig:specify-result-1}.}
+	\label{fig:specify-histogram-1}
 \end{figure}
 
-\begin{figure}[ht]
+\Cref{fig:specify-result-2} shows the result of specifying \texttt{f\_16.pgm} to \texttt{peppers.pgm}'s histogram. Since \texttt{peppers.pgm} has a large number of of purely black pixels, a similar amount of pixels in \texttt{f\_16.pgm} are converted to be purely black and there is a resulting large amount of detail loss - especially around darker regions.
+
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=.35\textwidth]{../Images/f_16}
 	\includegraphics[width=.35\textwidth]{../out/f_16-peppers-specify}
 	\caption{A comparison of \texttt{f\_16.pgm} with its specification to \texttt{peppers.pgm} (right).}
+	\label{fig:specify-result-2}
 \end{figure}
 
-\begin{figure}[ht]
-	\centering\includegraphics[width=.75\linewidth]{../out/f_16-peppers-specified-plot}
-	\caption{A comparison of histograms of \texttt{f\_16.pgm}, \texttt{peppers.pgm}, and the specified output above.}
+\Cref{fig:specify-histogram-2} compares the histograms of \texttt{f\_16.pgm}, \texttt{peppers.pgm}, and the specified output above. This gives a better look at the strengths and weaknesses of the algorithm - wherever the input image's histogram is below the input histogram (such as to the left), the algorithm succeeds in replicating the input histogram. In other regions (such as to the middle and right), the algorithm can only space out the bins to make the average density in a region similar.
+
+\begin{figure}[H]
+	\centering\includegraphics[width=.8\linewidth]{../out/f_16-peppers-specified-plot}
+	\caption{A comparison of histograms of \texttt{f\_16.pgm}, \texttt{peppers.pgm}, and the specified output as seen in \cref{fig:specify-result-2}.}
+	\label{fig:specify-histogram-2}
 \end{figure}
 
 \clearpage
 \listoflistings
+
+Source code can also be found on the project's GitHub page: \url{https://github.com/alexander-novo/CS474-PA1}.
 
 \begin{longlisting}
 	\caption{Header file for the common \texttt{Image} class.}
@@ -185,6 +241,11 @@ The source code for this implementation can be found in \cref{lst:equalize}.
 \end{longlisting}
 
 \begin{longlisting}
+	\caption{Implementation file for the \texttt{quantize} program.}
+	\cppcode{../Q2-Quantization/main.cpp}
+\end{longlisting}
+
+\begin{longlisting}
 	\caption{Implementation file for the \texttt{equalize} program.}
 	\label{lst:equalize}
 	\cppcode{../Q3-Equalization/main.cpp}
@@ -192,17 +253,19 @@ The source code for this implementation can be found in \cref{lst:equalize}.
 
 \begin{longlisting}
 	\caption{Implementation file for the \texttt{specify} program.}
+	\label{lst:specify}
 	\cppcode{../Q4-Specification/main.cpp}
 \end{longlisting}
 
-\begin{longlisting}
+\begin{listing}
 	\caption[\texttt{gnuplot} plotting file for generating two-histogram comparison plots.]{\texttt{gnuplot} plotting file for generating two-histogram comparison plots.\\Used for generating comparison plots in \cref{sec:equalization-results}.}
+	\label{lst:histogram-plot-double}
 	\plotcode{../Q3-Equalization/plot-histograms.plt}
-\end{longlisting}
+\end{listing}
 
-\begin{longlisting}
+\begin{listing}
 	\caption[\texttt{gnuplot} plotting file for generating three-histogram comparison plots.]{\texttt{gnuplot} plotting file for generating three-histogram comparison plots.\\Used for generating comparison plots in \cref{sec:specification-results}.}
 	\plotcode{../Q4-Specification/plot-histograms.plt}
-\end{longlisting}
+\end{listing}
 
 \end{document}
