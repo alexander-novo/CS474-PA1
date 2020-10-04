@@ -1,3 +1,4 @@
+# Q4-Specification/plot-histograms.plt
 # A gnuplot plotting file to plot the three histograms of data from specify with the -p switch
 if (!exists("outfile")) outfile='plot.eps'
 

@@ -152,7 +152,7 @@ The source code for generating these histogram comparison figures can be found i
 \subsection{Theory}
 As demonstrated in \cref{sec:equalization-results}, we can transform images to have a similar distribution of pixel intensities as a uniform distribution by using the CDF of the image. Since CDFs are monotonically increasing, the pre-image of a single point is always a continuous interval, and when the CDF is strictly increasing (as is usually the case), the pre-image of a single point is also a single point. In this way, we can naturally define an ``inverse'' CDF
 \begin{equation}
-	Q_X(x) = \inf F_X^{-1}({x}), \label{eq:quantile-func}
+	Q_X(x) = \inf F_X^{-1}(\{x\}), \label{eq:quantile-func}
 \end{equation}
 known as the ``quantile'' function. Note that for discrete distributions, the infimum is equal to the minimum, and is chosen because because CDFs are right-continuous (so in a discrete distribution, the minimum is always a possible value). Using the quantile function, we can transform a uniform distribution back to the original distribution. In this way, for two distributions $X$ and $Y$, $F_X$ transforms $X$ to a uniform distribution and $Q_Y$ transforms a uniform distribution back to $Y$, so $Q_Y \circ F_X$ transforms $X$ to $Y$, demonstrated in  \cref{fig:specification-cd}.
 
@@ -257,13 +257,13 @@ Source code can also be found on the project's GitHub page: \url{https://github.
 	\cppcode{../Q4-Specification/main.cpp}
 \end{longlisting}
 
-\begin{listing}
+\begin{listing}[H]
 	\caption[\texttt{gnuplot} plotting file for generating two-histogram comparison plots.]{\texttt{gnuplot} plotting file for generating two-histogram comparison plots.\\Used for generating comparison plots in \cref{sec:equalization-results}.}
 	\label{lst:histogram-plot-double}
 	\plotcode{../Q3-Equalization/plot-histograms.plt}
 \end{listing}
 
-\begin{listing}
+\begin{listing}[H]
 	\caption[\texttt{gnuplot} plotting file for generating three-histogram comparison plots.]{\texttt{gnuplot} plotting file for generating three-histogram comparison plots.\\Used for generating comparison plots in \cref{sec:specification-results}.}
 	\plotcode{../Q4-Specification/plot-histograms.plt}
 \end{listing}

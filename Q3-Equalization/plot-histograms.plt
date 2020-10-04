@@ -1,3 +1,4 @@
+# Q3-Equalization/plot-histograms.plt
 # A gnuplot plotting file to plot the two histograms of data from equalize with the -p switch
 if (!exists("outfile")) outfile='plot.eps'
 
